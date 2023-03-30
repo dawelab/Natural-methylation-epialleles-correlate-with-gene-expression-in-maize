@@ -1,0 +1,4 @@
+cd /scratch/yz77862/RNA/self/tpm
+for i in B73 B97 CML103 CML227 CML228 CML247 CML322 CML333 CML52 CML69 HP301 IL14H KI11 Ki3 Ky21 M162W M37W Mo18w Ms71 NC350 NC358 Oh43 Oh7b P39 TX303 TZI-8;do
+paste ${i}_*.txt | cut -f1,2,4,6,8,10,12,14,16,18,20,22 > ${i}_${i}.tpm
+done
