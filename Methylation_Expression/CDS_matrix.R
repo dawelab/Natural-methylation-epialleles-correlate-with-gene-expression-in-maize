@@ -1,10 +1,12 @@
 setwd("/Users/x/Desktop/Data/matrix/CDS/")
+library(tidyverse)
+library(matrixStats)
 NAM_CDS_list = list.files()
 NAM_CDS <- gsub("-REFERENCE-NAM-1.0.1.canon.cds_length.bed","",NAM_CDS_list)
 NAM_CDS <- gsub("-REFERENCE-NAM-5.0.1.canon.cds_length.bed","",NAM_CDS)
 NAM_CDS <- gsub("Zm-","",NAM_CDS)
 NAM_CDS[26] <- "Tzi8"
-#Import CDS length for each CDS elementg
+#Import CDS length for each CDS element
 for (i in 1:length(NAM_CDS)) {
   assign(paste0(NAM_CDS[i],".CDS"),
          read.table(NAM_CDS_list[i],
@@ -47,45 +49,66 @@ for (i in 1:length(NAM_CDS)) {
 #Create the  CDS matrix
 NAM_CDS_matrix <- merge(get(paste0(NAM_CDS[1],".agrCDS")),
                         get(paste0(NAM_CDS[2],".agrCDS")),
-                            by = "pan",
-                            all = T)
+                        by = "pan",
+                        all = T)
 for (i in 3:length(NAM_CDS)) {
   NAM_CDS_matrix <- merge(NAM_CDS_matrix,
                           get(paste0(NAM_CDS[i],".agrCDS")),
                           by = "pan",
                           all = T
-                          )
+  )
 }
 names(NAM_CDS_matrix) <- c("pan",gsub(".core","",core_file))
-#Generate a copy matrix for NAM founders
-copy_list <- gsub("core","copy",core_file)
-for (i in 1:length(copy_list)) {
-  assign(copy_list[i],
-         unique(select(get(core_file[i]),c("pan","copy")))
+#Create the copy matrix
+for (i in 1:length(NAM_CDS)) {
+  assign(paste0(NAM_CDS[i],".copy"),
+         aggregate(length~pan,
+                   data = get(paste0(NAM_CDS[i],".preCDS")),
+                   FUN = length
          )
+  )
 }
-NAM_copy_matrix <- merge(get(copy_list[1]),
-                         get(copy_list[2]),
+
+NAM_copy_matrix <- merge(get(paste0(NAM_CDS[1],".copy")),
+                         get(paste0(NAM_CDS[2],".copy")),
                          by="pan",
                          all=T) 
 for (i in 3:26) {
   NAM_copy_matrix <- merge(NAM_copy_matrix,
-                           get(copy_list[2]),
+                           get(paste0(NAM_CDS[i],".copy")),
                            by="pan",
                            all=T)
 }
 names(NAM_copy_matrix) <- c("pan",gsub(".core","",core_file))
+
 #Compare index mCG matrix and copy number matrix
 sum(names(NAM_copy_matrix) != names(NAM_CDS_matrix))
 sum(NAM_copy_matrix$pan!=NAM_CDS_matrix$pan)
 #Transform into double type
 NAM_CDS_matrix[NAM_CDS_matrix=="NULL"] <- NA
-for (i in 1:26) {
-      for (j in 1:dim(NAM_CDS_matrix)) {
-        if("," %in% NAM_CDS_matrix[j,i+1]) NAM_CDS_matrix[j,i] = NA
-      }  
+NAM_CDS_matrix_int = NAM_CDS_matrix[,2:27]
+NAM_copy_matrix_int = NAM_copy_matrix[,2:27]
+NAM_CDS_matrix_int[NAM_copy_matrix_int>=2] <- NA
+NAM_CDS_matrix_int <- as.matrix(NAM_CDS_matrix_int)
+NAM_CDS_matrix_int <- as.numeric(NAM_CDS_matrix_int)
+NAM_CDS_matrix_int <- matrix(NAM_CDS_matrix_int,
+                             nrow = dim(NAM_copy_matrix_int)[1],
+                             ncol = 26)
+pan_median <- rowMedians(NAM_CDS_matrix_int,na.rm = T)
+NAM_CDS_matrix_int = as.data.frame(NAM_CDS_matrix_int)
+NAM_CDS_matrix_int$pan = NAM_CDS_matrix$pan
+NAM_CDS_matrix_int$median = pan_median
+names(NAM_CDS_matrix_int) <- c(names(NAM_CDS_matrix)[2:27],"pan","median")
+NAM_CDS_matrix_int <- NAM_CDS_matrix_int[,c(names(NAM_CDS_matrix),"median")]
+
+#Filter the genes with large CDS length difference
+for (i in 1:dim(NAM_CDS_matrix_int)[1]) {
+  for (j in 2:27) {
+    if ( !is.na(NAM_CDS_matrix_int[i,j]) &
+      abs((NAM_CDS_matrix_int[i,j]-NAM_CDS_matrix_int[i,28])/NAM_CDS_matrix_int[i,28]) > 0.1)
+    {
+      NAM_CDS_matrix_int[i,j] <- NA
+    }
+  }
 }
-
-NAM_CDS_matrix <- as.character( NAM_CDS_matrix)
- NAM_CDS_matrix["," %in% NAM_CDS_matrix]
-
+write_delim(NAM_CDS_matrix_int,"/Users/x/Desktop/NAM_CDS_matrix.txt")
