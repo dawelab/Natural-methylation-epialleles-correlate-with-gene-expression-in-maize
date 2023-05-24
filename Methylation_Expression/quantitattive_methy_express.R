@@ -116,3 +116,109 @@ for (i in 3:length(pre_methy_list)) {
 }
 names(pan_mCG) <- c("pan",gsub(".core","",core_file))
 ```
+#Filter out the mCG values with CDS length in big difference
+```{r}
+NAM_CDS_matrix_int <- read.table("/Users/x/Desktop/NAM_CDS_matrix.txt")
+mCG_pan_list = data.frame(pan=pan_mCG$pan)
+CDS_matrix <- merge(mCG_pan_list,
+                    NAM_CDS_matrix_int,
+                    by = "pan",
+                    all.x = T)
+CDS_matrix<- CDS_matrix[,-28]
+sum(names(pan_mCG) != names(CDS_matrix))
+sum(pan_mCG$pan != CDS_matrix$pan)
+pan_mCG[is.na(CDS_matrix)] <- NA
+```
+# Make expression data
+```{r}
+express <- "/Users/x/Desktop/Data/expression/TPM/"
+express_file <- list.files(express)
+express_list <- gsub(".txt","",express_file)
+for (i in 1:26) {
+  assign(express_list[i],
+         select(read.table(paste0(express,express_file[i]),
+                    header = T),
+                c("gene","middle"))
+         )
+}
+#match pangene & gene ID
+for (i in 1:26) {
+  assign(paste0(express_list[i],".middle"),
+       select(merge(get(express_list[i]),
+             get(core_file[i]),
+             by = "gene",
+             all.y = T),
+             c("pan","middle"))
+)
+}
+#aggregate by pangene
+for (i in 1:26) {
+  assign(paste0(express_list[i],".pre"),
+       aggregate(middle~pan,
+                 data = get(paste0(express_list[i],".middle")),
+                 FUN = paste0%>%unlist
+                 )
+)
+  ##aggregate by pangene  for copy number
+for (i in 1:26) {
+  assign(paste0(express_list[i],".copy"),
+       aggregate(middle~pan,
+                 data = get(paste0(express_list[i],".middle")),
+                 FUN = length
+                 )
+)
+}
+#Create the middle expression matrix
+middle_matrix <- merge(get(paste0(express_list[1],".pre")),
+                       get(paste0(express_list[2],".pre")),
+                       by="pan",
+                       all = T)
+for (i in 3:26) {
+  middle_matrix <- merge(middle_matrix,
+                         get(paste0(express_list[i],".pre")),
+                         by="pan",
+                         all = T
+                         )
+}
+names(middle_matrix) <- c("pan",gsub(".core","",core_file))
+
+#Create a matrix for matrix copy number
+#Create the middle expression matrix
+middle_copy <- merge(get(paste0(express_list[1],".copy")),
+                       get(paste0(express_list[2],".copy")),
+                       by="pan",
+                       all = T)
+for (i in 3:26) {
+  middle_copy <- merge(middle_copy,
+                         get(paste0(express_list[i],".copy")),
+                         by="pan",
+                         all = T
+                         )
+}
+names(middle_copy) <- c("pan",gsub(".core","",core_file))
+
+#Mask the genes wtih big CDS difference
+middle <- merge(mCG_pan_list,
+      middle_matrix,
+      by="pan",
+      all.x = T)
+
+middle[is.na(pan_mCG)] <- NA
+middle <- as.matrix(middle)
+middle <- as.numeric(middle)
+middle <- matrix(middle, ncol)
+cor_list <- c()
+for (i in c(1:29,31:dim(middle)[1])){
+  x = as.numeric(as.matrix(unlist(middle[i,2:27])))
+  y = as.numeric(as.matrix(unlist(pan_mCG[i,2:27])))
+  if(sum(!is.na(x)) >=3) {
+  stat = cor.test(x,y)$estimate
+  cor_list <- c(cor_list,stat)
+  }
+  if(sum(!is.na(x)) < 3) {
+  stat = NA
+  cor_list <- c(cor_list,stat)
+  }
+}
+```
+
