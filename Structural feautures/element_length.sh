@@ -30,7 +30,7 @@ awk '{print $1,$4,$5,$3}' OFS="\t" Zm-B73-REFERENCE-NAM-5.0.TE.gff3 | sed 's/chr
 bedtools merge -i Zm-B73-REFERENCE-NAM-5.0.TE.bed > Zm-B73-REFERENCE-NAM-5.0.TE.merged.bed
 
 #Intersect the intron bed file and TE merged bed file
-bedtools intersect -wa -wb -a Zm-B73-REFERENCE-NAM-5.0.1.canon.intron.bed -b Zm-B73-REFERENCE-NAM-5.0.TE.merged.bed > Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.bed
+bedtools intersect -wo -a Zm-B73-REFERENCE-NAM-5.0.1.canon.intron.bed -b Zm-B73-REFERENCE-NAM-5.0.TE.merged.bed > Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.bed
 
 #Calculate the TE length intersect with intron
 awk '{print "TE",$10-$9,$7}' OFS="\t" Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.bed > Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.txt
