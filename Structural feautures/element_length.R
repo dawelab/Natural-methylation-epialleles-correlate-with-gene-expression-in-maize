@@ -14,7 +14,13 @@ B73_TE <- read.csv("/Users/x/Desktop/R/element_length/Zm-B73-REFERENCE-NAM-5.0.i
 #For different element, perform different operation 
 #Get the individual UTR length for different genes
 UTR_length <- B73_exon_intron_CDS_UTR %>% filter(element=="five_prime_UTR" |
-                                                 element=="three_prime_UTR")
+                                                 element=="three_prime_UTR") %>%
+  group_by(gene) %>% summarise(sum(length)) %>% as.data.frame() 
+
+UTR_length <- data.frame(element = "UTR",
+                          length= UTR_length$`sum(length)`,
+                          gene= UTR_length$gene)
+
 #Add up the element length for exon and intron
 B73_exon <- B73_exon_intron_CDS_UTR %>% filter(element == "exon") %>%
               group_by(gene) %>% summarise(sum(length)) %>% as.data.frame() 
@@ -36,13 +42,12 @@ CDS_length <- data.frame(element = "CDS",
 #Average the TE length in gene unit
 B73_TE_mean <- aggregate(length~gene,
                          data = B73_TE,
-                         FUN = mean)
+                         FUN = sum)
 TE_length <- data.frame(element="TE",
                         length=B73_TE_mean$length,
                         gene = B73_TE_mean$gene)
 
 
-df_length <- rbind(UTR_length,exon_length,intron_length,CDS_length,TE_length)
 
 #Read in the core gene and epiallele data set for the subsetting
 B73.core<- read.csv("/Users/x/Desktop/Data/core/B73.core",
@@ -83,7 +88,7 @@ df_length$element[df_length$element =="five_prime_UTR"| df_length$element =="thr
 df_length <- df_length[df_length$epiallele!="ambiguous",]
 df_length$epiallele = factor(df_length$epiallele,levels = c("UM","gbM","teM"))
 df_length$element = factor(df_length$element,
-                                     levels = c("UTR","TE","CDS","exon","intron"))
+                                     levels = c("UTR","TE","intron","CDS","exon"))
 ggplot(df_length,aes(x=epiallele,y=length,fill=element)) +
   geom_boxplot(outlier.size=.01,
                width = 0.5,
@@ -94,4 +99,4 @@ ggplot(df_length,aes(x=epiallele,y=length,fill=element)) +
   stat_boxplot(geom ='errorbar',
                width = 0.5,
                position=position_dodge(width = 0.7)) + 
-  scale_y_continuous(breaks = c(0,2000,4000,6000,8000)) + ylab("")
+  scale_y_continuous(breaks = c(0,2000,4000,6000,8000)) + ylab("") 
