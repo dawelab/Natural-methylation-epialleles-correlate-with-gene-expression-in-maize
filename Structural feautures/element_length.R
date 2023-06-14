@@ -1,54 +1,5 @@
+library(tidyverse)
 setwd("/Users/x/Desktop/R/element_length")
-#Read in the input data for element length
-B73_exon_intron_CDS_UTR <- read.csv("B73.intron.exon.CDS.UTR.txt",
-                                    sep = "\t",
-                                    header = F,
-                                    col.names = c("element","length","gene"))
-
-
-B73_TE <- read.csv("/Users/x/Desktop/R/element_length/Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.txt",
-                   sep = "\t",
-                   header = F,
-                   col.names = c("element","length","gene"))
-
-#For different element, perform different operation 
-#Get the individual UTR length for different genes
-UTR_length <- B73_exon_intron_CDS_UTR %>% filter(element=="five_prime_UTR" |
-                                                 element=="three_prime_UTR") %>%
-  group_by(gene) %>% summarise(sum(length)) %>% as.data.frame() 
-
-UTR_length <- data.frame(element = "UTR",
-                          length= UTR_length$`sum(length)`,
-                          gene= UTR_length$gene)
-
-#Add up the element length for exon and intron
-B73_exon <- B73_exon_intron_CDS_UTR %>% filter(element == "exon") %>%
-              group_by(gene) %>% summarise(sum(length)) %>% as.data.frame() 
-exon_length <- data.frame(element = "exon",
-                          length= B73_exon$`sum(length)`,
-                            gene= B73_exon$gene)
-
-B73_intron <- B73_exon_intron_CDS_UTR %>% filter(element == "intron") %>%
-  group_by(gene) %>% summarise(sum(length)) %>% as.data.frame()
-intron_length <- data.frame(element = "intron",
-                          length= B73_intron$`sum(length)`,
-                          gene= B73_intron$gene)
-
-B73_CDS <- B73_exon_intron_CDS_UTR %>% filter(element == "CDS") %>%
-  group_by(gene) %>% summarise(sum(length)) %>% as.data.frame()
-CDS_length <- data.frame(element = "CDS",
-                            length= B73_CDS$`sum(length)`,
-                            gene= B73_CDS$gene)
-#Average the TE length in gene unit
-B73_TE_mean <- aggregate(length~gene,
-                         data = B73_TE,
-                         FUN = sum)
-TE_length <- data.frame(element="TE",
-                        length=B73_TE_mean$length,
-                        gene = B73_TE_mean$gene)
-
-
-
 #Read in the core gene and epiallele data set for the subsetting
 B73.core<- read.csv("/Users/x/Desktop/Data/core/B73.core",
                     sep = "\t",
@@ -61,34 +12,55 @@ B73.epiallele <- read.csv("/Users/x/Desktop/Data/methylation/cgchgmtr/Zm-B73-REF
                           col.names = c("chr","start","end","strand","mCG","cCG","mCHG","cCHG","gene","epiallele"))[,9:10]
 B73.core.epi <- merge(B73.core,B73.epiallele,by="gene",all.x = T)
 
-#Subset the core gene and add the epiallele column
-TE_core = merge(TE_length,B73.core.epi,by="gene",all.y = T)
-TE_core$element[is.na(TE_core$element)] <- "TE"
-TE_core$length[is.na(TE_core$length)] <- 0
+#Read in the input data for element length
+B73_exon_intron_CDS_UTR <- read.csv("B73_CDS_exon_intron_UTR.txt",
+                                    sep = "\t",
+                                    header = F,
+                                    col.names = c("element","length","gene"))
 
-UTR_core = merge(UTR_length,B73.core.epi,by="gene",all.y = T)
-UTR_core$element[is.na(UTR_core$element)] <- "UTR"
-UTR_core$length[is.na(UTR_core$length)] <- 0
+B73_exon_intron_CDS_UTR$element[B73_exon_intron_CDS_UTR$element %in% c("five_prime_UTR","three_prime_UTR")] <- "UTR"
 
-intron_core = merge(intron_length,B73.core.epi,by="gene",all.y = T)
-intron_core$element[is.na(intron_core$element)] <- "intron"
-intron_core$length[is.na(intron_core$length)] <- 0
+B73_TE <- read.csv("/Users/x/Desktop/R/element_length/Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.txt",
+                   sep = "\t",
+                   header = F,
+                   col.names = c("element","length","gene"))
 
-exon_core = merge(exon_length,B73.core.epi,by="gene",all.y = T)
-exon_core$element[is.na(exon_core$element)] <- "exon"
-exon_core$length[is.na(exon_core$length)] <- 0
+B73_genetic_length <- rbind(B73_exon_intron_CDS_UTR,
+                            B73_TE)
 
-CDS_core = merge(CDS_length,B73.core.epi,by="gene",all.y = T)
-CDS_core$element[is.na(CDS_core$element)] <- "CDS"
-CDS_core$length[is.na(CDS_core$length)] <- 0
+#Add up the genetic elements in gene unit
 
-df_length = rbind(CDS_core,exon_core,intron_core,TE_core,UTR_core)
 
-df_length$element[df_length$element =="five_prime_UTR"| df_length$element =="three_prime_UTR"] <- "UTR"
+length_tidy <- function(ele){
+  element_length <- B73_genetic_length %>% filter(element == ele) %>%
+    group_by(gene) %>% summarise(sum(length)) %>% as.data.frame()
+  element_length$element <- ele
+  names(element_length)[2] <- "length"
+  element_length_core <- merge(B73.core.epi,element_length,all.x = T)
+  element_length_core$length[is.na(element_length_core$length)] <- 0
+  element_length_core$element[is.na(element_length_core$element)] <- ele
+  return(element_length_core)
+}
+
+df_length <- rbind(length_tidy("UTR"),
+                   length_tidy("TE"),
+                   length_tidy("intron"),
+                   length_tidy("exon"),
+                   length_tidy("CDS"))
+
+
+#Check the generated tidy data frame matched with the core gene or not and is there any na
+table(df_length$element)
+sum(is.na(df_length))
+#Remove the ambiguous gene
 df_length <- df_length[df_length$epiallele!="ambiguous",]
+#Reorder the epiallele 
 df_length$epiallele = factor(df_length$epiallele,levels = c("UM","gbM","teM"))
+#Reorder the genetic elements
 df_length$element = factor(df_length$element,
                                      levels = c("UTR","TE","intron","CDS","exon"))
+
+##plotting using ggplot2
 ggplot(df_length,aes(x=epiallele,y=length,fill=element)) +
   geom_boxplot(outlier.size=.01,
                width = 0.5,
@@ -100,3 +72,28 @@ ggplot(df_length,aes(x=epiallele,y=length,fill=element)) +
                width = 0.5,
                position=position_dodge(width = 0.7)) + 
   scale_y_continuous(breaks = c(0,2000,4000,6000,8000)) + ylab("") 
+
+#calculate the average cumulative genetic element length
+df_length %>% filter(element == "UTR")  %>% group_by(epiallele) %>% summarise(mean(length))
+df_length %>% filter(element == "TE")  %>% group_by(epiallele) %>% summarise(mean(length))
+df_length %>% filter(element == "intron")  %>% group_by(epiallele) %>% summarise(mean(length))
+df_length %>% filter(element == "exon")  %>% group_by(epiallele) %>% summarise(mean(length))
+df_length %>% filter(element == "CDS")  %>% group_by(epiallele) %>% summarise(mean(length))
+
+#Comparison the average lengths of the UM/gbM/teM gene sets
+element <- c("UM","gbM","teM")
+context <- c("UTR","CDS","exon","intron","TE")
+compare <- combn(element,2)
+p_value <- c()
+gr_context <- c()
+gr_element <- c()
+for (i in 1:3) {
+  for (j in 1:5){
+    p1 = wilcox.test(df_length$length[df_length$epiallele==compare[1,i] & df_length$element== context[j]],
+                     df_length$length[df_length$epiallele==compare[2,i] & df_length$element== context[j]])$p.value
+    p_value <- c(p1,p_value)
+    gr_context <- c(gr_context,paste0(compare[1,i],compare[2,i]))
+    gr_element <- c(gr_element,context[j])
+  }
+}
+cbind(p_value,gr_context,gr_element)
