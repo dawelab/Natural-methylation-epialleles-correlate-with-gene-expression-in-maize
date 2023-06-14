@@ -1,7 +1,7 @@
 #All of the output data will be stored as tidy dataframe as: element_type length geneID
 ##Generate a gff3 file with intron information using genome tools
 ml  GenomeTools/1.6.1-GCC-10.2.0
-gt gff3 -addintrons -retainids -sortlines Zm-B73-REFERENCE-NAM-5.0.1.canon.gff3 > Zm-B73-REFERENCE-NAM-5.0.1.canon.addintron.gff
+gt gff3 -addintrons -retainids -sortlines Zm-B73-REFERENCE-NAM-5.0.1.canon.gff3 > Zm-B73-REFERENCE-NAM-5.0.1.canon.addintron.gff3
 
 #use the canonical B73 annotation file as the input to calculate the element length of CDS, exon and UTR
 awk '$3=="exon" || $3=="intron" ||$3 =="CDS" || $3=="five_prime_UTR" || $3=="three_prime_UTR"' Zm-B73-REFERENCE-NAM-5.0.1.canon.addintron.gff3 |\
