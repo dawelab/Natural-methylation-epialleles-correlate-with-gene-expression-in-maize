@@ -1,15 +1,11 @@
-
 library(tidyverse)
-
 #Match the pangene and gene name to create the pan matrix for the CG/CHG methylation levels
 #1.Read all core  gene files
-
 coregene_path = "/Users/x/Desktop/Data/core/"
 core_file <- list.files(coregene_path)
 for (i in 1:length(core_file)) {
   assign(core_file[i],read_table(paste0(coregene_path,core_file[i]), col_names = 
              c("chr","start","end","strand","gene","pan","copy","duplicate"))[,5:8])
-
 #2. Read all methylation level files
 methy_path = "/Users/x/Desktop/Data/methylation/cgchgmtr/"
 methy_file = list.files(methy_path)
@@ -19,9 +15,7 @@ for (i in 1:length(methy_file)) {
          read.table(paste0(methy_path,methy_file[i]),
            col.names = c("chr","start","end","strand","mCG","cCG","mCHG","cCHG","gene","epiallele")))
 }
-```
-3. Use merge to put together pangene names and gene names
-```{r}
+#3. Use merge to put together pangene names and gene names
 pan_methy_names = gsub("core","pan_methy",core_file)
 for (i in 1:length(pan_methy_names)) {
   assign(pan_methy_names[i],
@@ -112,7 +106,6 @@ sum(names(pan_mCG) != names(CDS_matrix))
 sum(pan_mCG$pan != CDS_matrix$pan)
 pan_mCG[is.na(CDS_matrix)] <- NA
 # Make expression data
-
 express <- "/Users/x/Desktop/Data/expression/TPM/"
 express_file <- list.files(express)
 express_list <- gsub(".txt","",express_file)
