@@ -20,25 +20,26 @@ B73_exon_intron_CDS_UTR <- read.csv("B73_CDS_exon_intron_UTR.txt",
 
 B73_exon_intron_CDS_UTR$element[B73_exon_intron_CDS_UTR$element %in% c("five_prime_UTR","three_prime_UTR")] <- "UTR"
 
-B73_TE <- read.csv("/Users/x/Desktop/R/element_length/Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.txt",
+B73_TE <- read.csv("/Users/x/Desktop/R/element_length/Zm-B73-REFERENCE-NAM-5.0.intron_in_TE.bed",
                    sep = "\t",
                    header = F,
-                   col.names = c("element","length","gene"))
-
-B73_genetic_length <- rbind(B73_exon_intron_CDS_UTR,
-                            B73_TE)
+                   col.names = c("chrx","startx","endx","x1","x2","strand","gene","chry","starty","endy","length"))
+B73_TE <- B73_TE[,c("gene","length")]
+B73_TE <- data.frame(element = "TE",B73_TE)
+B73_genetic_length <- rbind(B73_exon_intron_CDS_UTR,B73_TE)
 
 #Add up the genetic elements in gene unit
-
-
 length_tidy <- function(ele){
+  element_length <- B73_genetic_length[B73_genetic_length$element==ele,]
+  element_length <- aggregate(element_length$length,by=list(element_length$gene),sum)
   element_length <- B73_genetic_length %>% filter(element == ele) %>%
-    group_by(gene) %>% summarise(sum(length)) %>% as.data.frame()
+    group_by(gene) %>% summarise(sum(length)) %>% as.data.frame() %>% unique()
   element_length$element <- ele
   names(element_length)[2] <- "length"
   element_length_core <- merge(B73.core.epi,element_length,all.x = T)
   element_length_core$length[is.na(element_length_core$length)] <- 0
   element_length_core$element[is.na(element_length_core$element)] <- ele
+  element_length_core <- unique(element_length_core)
   return(element_length_core)
 }
 
@@ -62,7 +63,7 @@ df_length$element = factor(df_length$element,
 
 ##plotting using ggplot2
 ggplot(df_length,aes(x=epiallele,y=length,fill=element)) +
-  geom_boxplot(outlier.size=.01,
+  geom_boxplot(outlier.size=0,
                width = 0.5,
                position=position_dodge(width = 0.7)) +
   theme_bw() + 
@@ -71,7 +72,8 @@ ggplot(df_length,aes(x=epiallele,y=length,fill=element)) +
   stat_boxplot(geom ='errorbar',
                width = 0.5,
                position=position_dodge(width = 0.7)) + 
-  scale_y_continuous(breaks = c(0,2000,4000,6000,8000)) + ylab("") 
+  scale_y_continuous(breaks = c(0,2000,4000,6000,8000,10000,12000)) + ylab("") +
+  theme(text = element_blank())
 
 #calculate the average cumulative genetic element length
 df_length %>% filter(element == "UTR")  %>% group_by(epiallele) %>% summarise(mean(length))
