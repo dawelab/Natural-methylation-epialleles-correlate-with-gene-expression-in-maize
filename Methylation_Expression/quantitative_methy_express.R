@@ -1,24 +1,16 @@
----
-title: "Quantitative_methy_express"
-author: "Yibing Zeng"
-date: "2023-05-23"
-output: html_document
----
-```{r}
+
 library(tidyverse)
-```
+
 #Match the pangene and gene name to create the pan matrix for the CG/CHG methylation levels
-1.Read all core  gene files
-```{r}
+#1.Read all core  gene files
+
 coregene_path = "/Users/x/Desktop/Data/core/"
 core_file <- list.files(coregene_path)
 for (i in 1:length(core_file)) {
   assign(core_file[i],read_table(paste0(coregene_path,core_file[i]), col_names = 
              c("chr","start","end","strand","gene","pan","copy","duplicate"))[,5:8])
-}
-```
-2. Read all methylation level files
-```{r}
+
+#2. Read all methylation level files
 methy_path = "/Users/x/Desktop/Data/methylation/cgchgmtr/"
 methy_file = list.files(methy_path)
 methy_names = gsub("core","methy",core_file)
@@ -38,10 +30,9 @@ for (i in 1:length(pan_methy_names)) {
                by = "gene")
          )
 }
-```
-4. Mask the ambiguous and teM gene mCG as NA and extract pan and mCG values to
-prepare the mCG pan gene matrix
-```{r}
+
+#4. Mask the ambiguous and teM gene mCG as NA and extract pan and mCG values to
+#prepare the mCG pan gene matrix
 mCG_list <- gsub("core","mCG",core_file)
 for (i in 1:length(mCG_list)) {
   assign(mCG_list[i],
@@ -51,9 +42,8 @@ for (i in 1:length(mCG_list)) {
               )
         )
 }
-```
-mask the ambiguous and teM genes' mCG values
-```{r}
+
+#mask the ambiguous and teM genes' mCG value
 B73.mCG$mCG[B73.mCG$epiallele %in% c("ambiguous","teM")] <- NA
 B97.mCG$mCG[B97.mCG$epiallele %in% c("ambiguous","teM")] <- NA
 CML103.mCG$mCG[CML103.mCG$epiallele %in% c("ambiguous","teM")] <- NA
@@ -80,19 +70,16 @@ Oh7B.mCG$mCG[Oh7B.mCG$epiallele %in% c("ambiguous","teM")] <- NA
 P39.mCG$mCG[P39.mCG$epiallele %in% c("ambiguous","teM")] <- NA
 Tx303.mCG$mCG[Tx303.mCG$epiallele %in% c("ambiguous","teM")] <- NA
 Tzi8.mCG$mCG[Tzi8.mCG$epiallele %in% c("ambiguous","teM")] <- NA
-```
-#get rid of the epiallele column
-```{r}
+
+#get rid of the epiallele colum
 for (i in 1:length(mCG_list)) {
   assign(mCG_list[i],
        select(get(pan_methy_names[i]),
               c("pan","mCG")
               )
         )
-}
-```
-aggregate the multiple copy genes
-```{r}
+
+#aggregate the multiple copy genes
 pre_methy_list <- gsub("methy","pre",methy_names)
 for (i in 1:length(pre_methy_list)) {
   assign(pre_methy_list[i],
@@ -101,9 +88,7 @@ for (i in 1:length(pre_methy_list)) {
                 FUN = paste0%>%unlist)
          )
 }
-```
 
-```{r}
 pan_mCG <- merge(get(pre_methy_list[1]),
                  get(pre_methy_list[2]),
                  by = "pan",
@@ -115,9 +100,7 @@ for (i in 3:length(pre_methy_list)) {
                    all=T)
 }
 names(pan_mCG) <- c("pan",gsub(".core","",core_file))
-```
 #Filter out the mCG values with CDS length in big difference
-```{r}
 NAM_CDS_matrix_int <- read.table("/Users/x/Desktop/NAM_CDS_matrix.txt")
 mCG_pan_list = data.frame(pan=pan_mCG$pan)
 CDS_matrix <- merge(mCG_pan_list,
@@ -128,9 +111,8 @@ CDS_matrix<- CDS_matrix[,-28]
 sum(names(pan_mCG) != names(CDS_matrix))
 sum(pan_mCG$pan != CDS_matrix$pan)
 pan_mCG[is.na(CDS_matrix)] <- NA
-```
 # Make expression data
-```{r}
+
 express <- "/Users/x/Desktop/Data/expression/TPM/"
 express_file <- list.files(express)
 express_list <- gsub(".txt","",express_file)
@@ -220,5 +202,3 @@ for (i in c(1:29,31:dim(middle)[1])){
   cor_list <- c(cor_list,stat)
   }
 }
-```
-
