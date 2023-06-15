@@ -15,6 +15,7 @@ sed 's/chr//g' | sed 's/Parent=//g' | sed 's/_.00.//g' |\
 awk '{print $1,$4-1,$5,".",".",$7,$9}' OFS="\t" | awk '$3!="."' | \
 sort -b -k1,1 -k2,2n -k3,3n  > Zm-B73-REFERENCE-NAM-5.0.1.canon.intron.bed
 
+ml BEDTools
 #use the TE annotation file as the input to generate the TE bed file
 #Merge the TE feautures that ovelapped with each other
 awk '{print $1,$4-1,$5,$3}' OFS="\t" Zm-B73-REFERENCE-NAM-5.0.TE.gff3 | sed 's/chr//g' | sort -b -k1,1 -k2,2n -k3,3n > Zm-B73-REFERENCE-NAM-5.0.TE.bed
