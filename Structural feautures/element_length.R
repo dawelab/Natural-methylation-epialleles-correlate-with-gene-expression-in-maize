@@ -1,10 +1,9 @@
 library(tidyverse)
 setwd("/Users/x/Desktop/R/element_length")
 #Read in the core gene and epiallele data set for the subsetting
-B73.core<- read.csv("/Users/x/Desktop/Data/core/B73.core",
-                    sep = "\t",
-                    header = F,
-                    col.names =  c("chr","start","end","strand","gene","pan","copy","duplicate"))[,5:6]
+B73.core<- read.csv("/Users/x/Desktop/Data/core_gene/B73.class.txt",
+                    sep = ",",
+                    header = T) %>% filter(class=="Core Gene")
 
 B73.epiallele <- read.csv("/Users/x/Desktop/Data/methylation/cgchgmtr/Zm-B73-REFERENCE-NAM-5.0.1.canon.gene.gene.mtr.ID.type.txt",
                           sep = "\t",
@@ -59,7 +58,7 @@ df_length <- df_length[df_length$epiallele!="ambiguous",]
 df_length$epiallele = factor(df_length$epiallele,levels = c("UM","gbM","teM"))
 #Reorder the genetic elements
 df_length$element = factor(df_length$element,
-                                     levels = c("UTR","TE","intron","CDS","exon"))
+                           levels = c("UTR","TE","intron","CDS","exon"))
 
 ##plotting using ggplot2
 ggplot(df_length,aes(x=epiallele,y=length,fill=element)) +
