@@ -23,11 +23,12 @@ for (i in 1:length(NAM_CDS)) {
         )
 }
 #Match the pan and gene ID 
-coregene_path = "/Users/x/Desktop/Data/core/"
+coregene_path = "/Users/x/Desktop/Data/core_gene/"
 core_file <- list.files(coregene_path)
 for (i in 1:length(core_file)) {
-  assign(core_file[i],read_table(paste0(coregene_path,core_file[i]), col_names = 
-                                   c("chr","start","end","strand","gene","pan","copy","duplicate"))[,5:8])
+  assign(core_file[i],read.table(paste0(coregene_path,core_file[i]), 
+                                 sep = ",", header = T) %>%
+           filter(class == "Core Gene")  ) 
 }
 #cbind(core_file,NAM_CDS_list)
 for (i in 1:length(NAM_CDS)) {
@@ -58,7 +59,7 @@ for (i in 3:length(NAM_CDS)) {
                           all = T
   )
 }
-names(NAM_CDS_matrix) <- c("pan",gsub(".core","",core_file))
+names(NAM_CDS_matrix) <- c("pan",gsub(".class.txt","",core_file))
 #Create the copy matrix
 for (i in 1:length(NAM_CDS)) {
   assign(paste0(NAM_CDS[i],".copy"),
@@ -79,7 +80,7 @@ for (i in 3:26) {
                            by="pan",
                            all=T)
 }
-names(NAM_copy_matrix) <- c("pan",gsub(".core","",core_file))
+names(NAM_copy_matrix) <- c("pan",gsub(".class.txt","",core_file))
 
 #Compare index mCG matrix and copy number matrix
 sum(names(NAM_copy_matrix) != names(NAM_CDS_matrix))
