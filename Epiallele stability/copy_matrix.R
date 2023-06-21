@@ -53,3 +53,6 @@ write.table(copy_matrix[copy_matrix$class == "N-N", c("pan","max")],
             "/Users/x/Desktop/Data/core_gene/N-N_pangene.txt",
             quote = F,
             row.names = F, col.names = c("pan","max"))
+
+write_rds(copy_matrix,"/Users/x/Desktop/Data/core_gene/copy_matrix.rds")
+
