@@ -12,15 +12,21 @@ Table fo contents:
      mCHG = (#methylated cytosines in genes CDS region in CHG context)/(#methylated cytosines in genes CDS region in CHG context)
   Reference codes:
   * ```cgmaptools select region -i NAM.CGmap -r NAM_CDS.bed```   #subset the CGmaps only in CDS region
-  * ```cgmaptools mtr -i NAM_CDS.CGmap -r NAM_gene.bed```#calculate gene methylated level 
+   
+  * ```cgmaptools mtr -i NAM_CDS.CGmap -r NAM_gene.bed```#calculate gene methylated level
+   
   * ```awk``` for gene epiallele classification
    
 1.2 Define the gene epiallele status 
    Workflow:
     1. Coverage: cCG (# cytosines in CG context) & cCHG (# cytosines in CHG context) >= 40
+
     2. Specific mCG & mCHC values:
+    
     UM: mCG <= 0.05 & mCHG <= 0.05
+    
     gbM: mCG >= 0.2 & mCHG <= 0.05
+    
     teM: mCG >= 0.4 & mCHG >= 0.4
     
 1.3 Core gene: Based on the sequence homology, subset of pangenes that present in 26 genomes, get from Hufford et al. (2021) pangene matrix version 3.
