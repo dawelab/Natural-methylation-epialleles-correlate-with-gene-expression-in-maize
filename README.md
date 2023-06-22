@@ -32,6 +32,10 @@ Table fo contents:
 1.3 Core gene: Based on the sequence homology, subset of pangenes that present in 26 genomes, get from Hufford et al. (2021) pangene matrix version 3.
 This is an excel file provides interlink for pangene and gene. For each pangene ID, it contains the according geneID for 26 genomes, NA indicates missing syntenic gene and multiple gene ID in one cell indicates tandem duplicated genes. Class indicates the pangene status such as core, near core, dispensibale and private genes. In all analysis, we used the core gene set unless specified.
 
+The joint distribution of pangene class and epiallele status
+<img width="596" alt="Screen Shot 2023-06-22 at 1 50 04 PM" src="https://github.com/dawelab/Natural-methylation-epialleles-correlate-with-gene-expression-in-maize/assets/48507231/5ef5577c-aebf-4917-9447-7796984526e1">
+
+
 1.4 Picture the methylation environment around genes(meta gene):
 * ```cgmaptools bed2fragreg``` and ```awk``` pipeline (see  ```pre_MFG.sh``` ) are used to generated a tab deliminated file with upstream/downstream 3k and 1.5k within genes in 100bp interval for every genes.
 * ```cgmaptools mfg -i```#calculate methylated level 
