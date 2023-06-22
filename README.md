@@ -1,26 +1,36 @@
 Table fo contents:
 
 **1. patterns of gene methylation.**
+<img width="663" alt="image" src="https://github.com/dawelab/Natural-methylation-epialleles-correlate-with-gene-expression-in-maize/assets/48507231/e3111b8b-5899-4776-85d6-eb5b42d2f0f4">
 
-1.1 Define the gene type
 
-The pipeline for methylation levels calculation in different regions made used of cgmaptools (https://cgmaptools.github.io/cgmaptools_documentation/what-is-cgmaptools.html). The format of methylome file is CGmap file with information of sequence context and methylation level of every covered cytosines.
+1.1 Measure genic methylation: only use CDS sequence:
+  Workflow:
+     1. Use CGmaptools (2019 version: https://cgmaptools.github.io/cgmaptools_documentation/what-is-cgmaptools.html) to select sites exits only in CDS regrion.
+     2. Use gene bed file to calculatet genic methylation for genes: 
+     mCG = (#methylated cytosines in genes CDS region in CG context)/(#methylated cytosines in genes CDS region in CG context)
+     mCHG = (#methylated cytosines in genes CDS region in CHG context)/(#methylated cytosines in genes CDS region in CHG context)
+  Reference codes:
+  * ```cgmaptools select region -i NAM.CGmap -r NAM_CDS.bed```   #subset the CGmaps only in CDS region
+  * ```cgmaptools mtr -i NAM_CDS.CGmap -r NAM_gene.bed```#calculate gene methylated level 
+  * ```awk``` for gene epiallele classification
+   
+1.2 Define the gene epiallele status 
+   Workflow:
+    1. Coverage: cCG (# cytosines in CG context) & cCHG (# cytosines in CHG context) >= 40
+    2. Specific mCG & mCHC values:
+    UM: mCG <= 0.05 & mCHG <= 0.05
+    gbM: mCG >= 0.2 & mCHG <= 0.05
+    teM: mCG >= 0.4 & mCHG >= 0.4
+    
+1.3 Core gene: Based on the sequence homology, subset of pangenes that present in 26 genomes, get from Hufford et al. (2021) pangene matrix version 3.
+This is an excel file provides interlink for pangene and gene. For each pangene ID, it contains the according geneID for 26 genomes, NA indicates missing syntenic gene and multiple gene ID in one cell indicates tandem duplicated genes. Class indicates the pangene status such as core, near core, dispensibale and private genes. In all analysis, we used the core gene set unless specified.
 
-Calculate gene methylation levels
-
-* ```cgmaptools select region -i NAM.CGmap -r NAM_CDS.bed```   #subset the CGmaps only in CDS region
-* ```cgmaptools mtr -i NAM_CDS.CGmap -r NAM_gene.bed```#calculate gene methylated level 
-* ```awk``` for gene epiallele classification
-
-Generated core gene file
-
-To define a gene to be core gene, we required a gene to present at 26 genomes. For this end, we made use pangene matrix made in Hufford et al. (2021), an excel file provides interlink for pangene and gene. For each pangene ID, it contains the according geneID for 26 genomes, NA indicates missing syntenic gene and multiple gene ID in one cell indicates tandem duplicated genes. Class indicates the pangene status such as core, near core, dispensibale and private genes. In all analysis, we used the core gene set unless specified.
-
-1.2 Picture the methylation environment around genes(meta gene):
+1.4 Picture the methylation environment around genes(meta gene):
 * ```cgmaptools bed2fragreg``` and ```awk``` pipeline (see  ```pre_MFG.sh``` ) are used to generated a tab deliminated file with upstream/downstream 3k and 1.5k within genes in 100bp interval for every genes.
 * ```cgmaptools mfg -i```#calculate methylated level 
 
-1.3 The distribution of 100 bp upstream TSS site.
+1.5 The distribution of 100 bp upstream TSS site.
 
 ```cgmaptools mtr``` is used to calculate the methylated levels for every 100 bp upstream TSS region.
 
