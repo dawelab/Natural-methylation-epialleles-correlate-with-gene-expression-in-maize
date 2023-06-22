@@ -2,17 +2,20 @@ library(ggExtra)
 library(tidyverse)
 #library(ggbreak)
 #library (plotrix)
-
 setwd("/Users/x/Desktop/Plot/Genic methylation")
-B73_all = read.table("/Users/x/Desktop/Data/methylation/cgchgmtr/Zm-B73-REFERENCE-NAM-5.0.1.canon.gene.gene.mtr.ID.type.txt",sep = "\t")
-names(B73_all) <- c('chr','start','end','strand',
-                    'mCG','cCG','mCHG','cCHG',
-                    'gene','epiallele')
+B73_all = read.table("https://raw.githubusercontent.com/dawelab/Natural-methylation-epialleles-correlate-with-gene-expression-in-maize/main/patterns%20of%20gene%20methylation/epiallele/Zm-B73-REFERENCE-NAM-5.0.1.canon.gene.gene.mtr.ID.type.txt",
+                     sep = "\t", col.names = c('chr','start','end','strand',
+                                               'mCG','cCG','mCHG','cCHG',
+                                               'gene','epiallele'))
+table(B73_all$epiallele)
+B73_class = read.table("https://raw.githubusercontent.com/dawelab/Natural-methylation-epialleles-correlate-with-gene-expression-in-maize/main/patterns%20of%20gene%20methylation/pangene_class/B73.class.txt",
+                       sep = ",",header = T)
+B73_pan = merge(B73_class,B73_all,by="gene",all.y = T)
+B73_core = B73_pan[B73_pan$class=="Core Gene",]
 
-B73_class = read.table("/Users/x/Desktop/Data/core_gene/B73.class.txt",sep = ",",header = T)
-B73_core = merge(B73_class,B73_all,by="gene",all.y = T)
-B73_core = B73_core[B73_core$class=="Core Gene",]
-B73_core = unique(B73_core)
+table(B73_pan$class[B73_pan$cCG >=40 & B73_pan$cCHG >=40],B73_pan$epiallele[B73_pan$cCG >=40 & B73_pan$cCHG >=40])[,c(4,2,3,1)]
+table(B73_pan$epiallele[B73_pan$cCG >=40 & B73_pan$cCHG >=40])[c(4,2,3,1)]
+
 #Calculate the frequency of B73 gene methylation types
 table(B73_all$epiallele[B73_all$cCG >=40 & B73_all$cCHG>=40])
 table(B73_core$epiallele[B73_core$cCG >=40 & B73_core$cCHG>=40])
