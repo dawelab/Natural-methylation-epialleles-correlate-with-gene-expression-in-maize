@@ -1,11 +1,9 @@
 library(tidyverse)
 library(extrafont)
 #Read in the core gene and epiallele data set for the subsetting
-B73.core<- read.csv("/Users/x/Desktop/Data/core/B73.core",
-                    sep = "\t",
-                    header = F,
-                    col.names =  c("chr","start","end","strand","gene","pan","copy","duplicate"))[,5:6]
-
+B73.core<- read.csv("/Users/x/Desktop/Data/core_gene/B73.class.txt",
+                    header = T) %>% filter(class == "Core Gene")
+                   
 B73.epiallele <- read.csv("/Users/x/Desktop/Data/methylation/cgchgmtr/Zm-B73-REFERENCE-NAM-5.0.1.canon.gene.gene.mtr.ID.type.txt",
                           sep = "\t",
                           header = F,
@@ -23,5 +21,6 @@ df_CDS_TE = data.frame(epiallele =c("gbM","teM","UM"),
                        proportion = c(402/sum(7138,402),249/sum(249,471),
                                       426/sum(426,12244)))
 df_CDS_TE$epiallele = factor(df_CDS_TE$epiallele,levels = c("UM","gbM","teM"))
-F2D=ggplot(df_CDS_TE,aes(x=epiallele,y=proportion)) + theme_bw() +
-  geom_bar(stat = "identity") 
+(F2D=ggplot(df_CDS_TE,aes(x=epiallele,y=proportion)) + theme_bw() +
+  geom_bar(stat ="identity",
+           width = .35) )
