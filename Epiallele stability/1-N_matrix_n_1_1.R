@@ -72,6 +72,7 @@ for (i in 2:26) {
                        all.x = T)
 }
 names(copy_matrix)  <- c("pan",NAM)
+write_rds(copy_matrix,"/Users/x/Desktop/copy_matrix.rds")
 
 #assign the pangene status for copy matrix
 copy_matrix$min <- rowMins(as.matrix(copy_matrix[,2:27]),na.rm = T)
@@ -110,7 +111,7 @@ epi_matrix  %>% filter(N >=2) %>%  select(status,duplicate) %>% table()
 
 
 #Select the final 1-N matrix and export as rds format
-epi_matrix_final <- epi_matrix %>%filter(duplicate == "1-N") %>% filter(status %in% c("UM","gbM","teM")) %>% filter(N >=2)
+epi_matrix_final <- epi_matrix %>%filter(duplicate == "1_N") %>% filter(status %in% c("UM","gbM","teM")) %>% filter(N >=2)
 
 #Write out the epiallele matrix for 1-N pangenes
 write_rds(epi_matrix_final,"/Users/x/Desktop/epi_matrix_final.rds")
@@ -119,8 +120,48 @@ write_rds(epi_matrix_final,"/Users/x/Desktop/epi_matrix_final.rds")
 epi_matrix_1_1_UM_gbM <- epi_matrix %>%filter(duplicate == "1_1" & UM >=2 & gbM >=2) %>% filter(status %in% c("UM_gbM")) 
 epi_matrix_1_1_UM_teM <- epi_matrix %>%filter(duplicate == "1_1" & UM >=2 & teM >=2) %>% filter(status %in% c("UM_teM")) 
 epi_matrix_1_1_gbM_teM <- epi_matrix %>%filter(duplicate == "1_1" & gbM >=2 & teM >=2) %>% filter(status %in% c("gbM_teM")) 
-epi_matrix_1_1_gbM_teM <- epi_matrix %>%filter(duplicate == "1_1" & UM >=2 & gbM >=2 & teM >=2) %>% filter(status %in% c("UM_gbM_teM")) 
+epi_matrix_1_1_UM_gbM_teM <- epi_matrix %>%filter(duplicate == "1_1" & UM >=2 & gbM >=2 & teM >=2) %>% filter(status %in% c("UM_gbM_teM")) 
+
+dim(epi_matrix_1_1_UM_gbM)
+dim(epi_matrix_1_1_UM_teM)
+dim(epi_matrix_1_1_gbM_teM)
+dim(epi_matrix_1_1_UM_gbM_teM)
+
+epi_matrix %>%filter(duplicate == "1_1" & UM >=2) %>% filter(status %in% c("UM")) %>% dim
+epi_matrix %>%filter(duplicate == "1_1" & teM >=2) %>% filter(status %in% c("teM")) %>% dim
+epi_matrix %>%filter(duplicate == "1_1" & gbM >=2 ) %>% filter(status %in% c("gbM")) %>% dim
+
 
 write_rds(epi_matrix_1_1_UM_gbM,"/Users/x/Desktop/epi_matrix_1_1_gbM_teM.rds")
 write_rds(epi_matrix_1_1_UM_teM,"/Users/x/Desktop/epi_matrix_1_1_UM_teM.rds")
 write_rds(epi_matrix_1_1_gbM_teM,"/Users/x/Desktop/epi_matrix_1_1_gbM_teM.rds")
+
+###Plotting
+#Relative abundance of 1-to-N pangenes. 1-to-N pangenes were categorized 
+#by their singleton epiallele type, and the total number divided by the number 
+#of stable 1-to-1 pangenes of the same epiallele type
+df_3D <- data.frame(proportion = c(4149/7001,1589/5992,232/277),
+                    epiallele = c("UM","gbM","teM"))
+df_3D$epiallele <- factor(df_3D$epiallele, 
+                          levels = c("UM","gbM","teM"))
+df_3D %>% ggplot(aes(x=epiallele,y=proportion )) +
+  geom_bar(stat="identity", width = 0.35) +
+  theme_bw()
+
+#Percent of 1-to-1 pangenes with stable epialleles. For each epiallele type, 
+#the number of 1-to-1 stable pangenes (represented by just one epiallele) 
+#was divided by the number of unstable and stable 1-to-1 pangenes with that epiallele.
+epi_matrix %>% filter(duplicate == "1_1") %>% 
+  select("status") %>% table()
+ 
+df_3E <- data.frame(proportion = c(7001/sum(7001,897,27,10),
+                                   5992/sum(5992,897,30,10),
+                                    277/sum(30,277,27,10)),
+                    epiallele = c("UM","gbM","teM"))
+df_3E$epiallele <- factor(df_3E$epiallele, 
+                          levels = c("UM","gbM","teM"))
+df_3E %>% ggplot(aes(x=epiallele,y=proportion )) +
+  geom_bar(stat="identity", width = 0.35) +
+  scale_y_continuous(breaks = seq(0,0.8,0.2))+
+  theme_bw()
+
