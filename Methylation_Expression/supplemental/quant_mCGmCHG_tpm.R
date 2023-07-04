@@ -394,3 +394,12 @@ ggplot(stat_c_mCHG,aes(x=tissue,y=value,shape=statistics)) +
   theme_classic()  +
   xlab("") +
   ylab("")
+
+
+###write out two the expression matrice
+write.csv(endosperm_matrix, "/Users/x/Desktop/endosperm_matrix.csv",
+          row.names = F,
+          quote = F)
+write.csv(embryo_matrix, "/Users/x/Desktop/embryo_matrix.csv",
+          row.names = F,
+          quote = F)
