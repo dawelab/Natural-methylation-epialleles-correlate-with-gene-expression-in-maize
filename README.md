@@ -87,7 +87,7 @@ The joint distribution of pangene class and epiallele status
 * With geneID with similar cumulative CDS, we use ```merge``` to match panID to each geneID to create gene copy matrix. 
 
 
-3.2 Calculate 
+3.2 Calculation 
 * Divide the epiallele matrix into singleton with all genes to be UM, gbM and teM set.
 * NULL all singletons, combine the tandem duplicates as a single list for each set. 
 * ```table``` is used to count all UM, gbM and teM is each duplicate list.
