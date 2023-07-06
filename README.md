@@ -1,5 +1,3 @@
-Table fo contents:
-
 **1. patterns of gene methylation.**
 <img width="663" alt="image" src="https://github.com/dawelab/Natural-methylation-epialleles-correlate-with-gene-expression-in-maize/assets/48507231/e3111b8b-5899-4776-85d6-eb5b42d2f0f4">
 
