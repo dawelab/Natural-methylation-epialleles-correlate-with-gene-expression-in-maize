@@ -3,14 +3,13 @@
 
 
 1.1 Measure genic methylation: only use CDS sequence:
+
   Workflow:
-     1. Use CGmaptools (2019 version: https://cgmaptools.github.io/cgmaptools_documentation/what-is-cgmaptools.html) to select sites exits only in CDS regrion.
-     
+     1. Use CGmaptools (2019 version: https://cgmaptools.github.io/cgmaptools_documentation/what-is-cgmaptools.html) to select sites exits only in CDS regrion    
      2. Use gene bed file to calculatet genic methylation for genes: 
-     
-     mCG = (#methylated cytosines in genes CDS region in CG context)/(#methylated cytosines in genes CDS region in CG context)
-    
+     mCG = (#methylated cytosines in genes CDS region in CG context)/(#methylated cytosines in genes CDS region in CG context) 
      mCHG = (#methylated cytosines in genes CDS region in CHG context)/(#methylated cytosines in genes CDS region in CHG context)
+ 
   Reference codes:
   * ```cgmaptools select region -i NAM.CGmap -r NAM_CDS.bed```   #subset the CGmaps only in CDS region
    
