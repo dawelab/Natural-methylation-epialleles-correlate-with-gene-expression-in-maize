@@ -36,12 +36,16 @@ df_epi_count <- data.frame(count= c(unlist(epiallele_count, use.names = F)) ,
                            epiallele =rep(names(epiallele_count),each = 26))
 df_epi_count$epiallele = factor(df_epi_count$epiallele,
                                    level = c("UM","gbM","teM","ambiguous"))
-
+blank_group1 <- data.frame(epiallele = rep(c("UM","gbM","teM","ambiguous"),each=2),
+                           x = 0 ,
+                           y = c(0,1.5*10^4,0,10000,0,4000,0,6000))
 #plotting
 df_epi_count %>% ggplot(aes(x=NAM,y=count, fill = epiallele)) +
   geom_bar(stat = "identity") +
+  geom_blank(data=blank_group1, aes(x=x,y=y)) +
   facet_wrap(~epiallele, nrow = 2 , scales = "free_y") +
-  theme_bw() + theme(axis.text.x = element_text(angle = 90))
+  theme_bw() + theme(axis.text.x = element_text(angle = 90)) +
+  ggtitle("all gene")
 
 ##Subsetting the core gene
 core_set <- paste0(NAM,".coreepi")
@@ -68,9 +72,16 @@ df_epi_count_core <- data.frame(count= c(unlist(core_epiallele_count, use.names 
                            NAM = rep(NAM,4),
                            epiallele =rep(names(core_epiallele_count),each = 26))
 df_epi_count_core$epiallele = factor(df_epi_count$epiallele,
-                                level = c("UM","gbM","teM","ambiguous"))
+                                     level = c("UM","gbM","teM","ambiguous"))
+
+blank_group2 <- data.frame(epiallele = rep(c("UM","gbM","teM","ambiguous"),each=2),
+                           x = 0 ,
+                           y = c(0,1.5*10^4,0,10000,0,4000,0,6000))
+
 #plotting
 df_epi_count_core %>% ggplot(aes(x=NAM,y=count, fill = epiallele)) +
   geom_bar(stat = "identity") +
+  geom_blank(data=blank_group2,aes(x=x,y=y)) +
   facet_wrap(~epiallele, nrow = 2 , scales = "free_y") +
-  theme_bw() + theme(axis.text.x  = element_text(angle = 90))
+  theme_bw() + theme(axis.text.x  = element_text(angle = 90)) +
+  ggtitle("core gene")
