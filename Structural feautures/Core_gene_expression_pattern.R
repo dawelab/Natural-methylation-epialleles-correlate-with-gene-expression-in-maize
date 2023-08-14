@@ -1,7 +1,7 @@
 library(tidyverse)
 library(cowplot)
 
-#Read in the core gene and epiallele data set for the subsetting
+#Read in the core gene and epiallele data set for the substracting by hand
 B73_expr <- read.csv("https://raw.githubusercontent.com/dawelab/Natural-methylation-epialleles-correlate-with-gene-expression-in-maize/main/Data/B73.all.csv") %>% filter(class == "Core Gene" & epiallele != "ambiguous")
 B73_expr[B73_expr$gene == "Zm00001eb007510",] 
 B73_expr <- B73_expr[,c(10,14:23)]
