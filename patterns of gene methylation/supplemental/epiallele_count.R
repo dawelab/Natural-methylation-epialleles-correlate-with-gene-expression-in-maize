@@ -29,10 +29,10 @@ for (i in 1:26) {
                            make.row.names = FALSE)
 }
 names(epiallele_count) <- c("ambiguous","gbM","teM","UM")
-cbind(epiallele_count,name)
-cbind(epiallele_count/rowSums(epiallele_count),name)
+cbind(epiallele_count,NAM)
+cbind(epiallele_count/rowSums(epiallele_count),NAM)
 df_epi_count <- data.frame(count= c(unlist(epiallele_count, use.names = F)) ,
-                           NAM = rep(name,4),
+                           NAM = rep(NAM,4),
                            epiallele =rep(names(epiallele_count),each = 26))
 df_epi_count$epiallele = factor(df_epi_count$epiallele,
                                    level = c("UM","gbM","teM","ambiguous"))
@@ -65,7 +65,7 @@ for (i in 1:26) {
 }
 names(core_epiallele_count) <- c("ambiguous","gbM","teM","UM")
 df_epi_count_core <- data.frame(count= c(unlist(core_epiallele_count, use.names = F)) ,
-                           NAM = rep(name,4),
+                           NAM = rep(NAM,4),
                            epiallele =rep(names(core_epiallele_count),each = 26))
 df_epi_count_core$epiallele = factor(df_epi_count$epiallele,
                                 level = c("UM","gbM","teM","ambiguous"))
