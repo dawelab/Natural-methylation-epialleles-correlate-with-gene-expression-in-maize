@@ -132,7 +132,7 @@ epi_matrix %>%filter(duplicate == "1_1" & teM >=2) %>% filter(status %in% c("teM
 epi_matrix %>%filter(duplicate == "1_1" & gbM >=2 ) %>% filter(status %in% c("gbM")) %>% dim
 
 
-write_rds(epi_matrix_1_1_UM_gbM,"/Users/x/Desktop/epi_matrix_1_1_gbM_teM.rds")
+write_rds(epi_matrix_1_1_UM_gbM,"/Users/x/Desktop/epi_matrix_1_1_UM_gbM.rds")
 write_rds(epi_matrix_1_1_UM_teM,"/Users/x/Desktop/epi_matrix_1_1_UM_teM.rds")
 write_rds(epi_matrix_1_1_gbM_teM,"/Users/x/Desktop/epi_matrix_1_1_gbM_teM.rds")
 
@@ -164,4 +164,3 @@ df_3E %>% ggplot(aes(x=epiallele,y=proportion )) +
   geom_bar(stat="identity", width = 0.35) +
   scale_y_continuous(breaks = seq(0,0.8,0.2))+
   theme_bw()
-
