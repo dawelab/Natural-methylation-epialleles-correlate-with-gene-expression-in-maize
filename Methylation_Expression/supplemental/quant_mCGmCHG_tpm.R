@@ -1,3 +1,5 @@
+library(matrixStats)
+library(tidyverse)
 ##Read in the pangene matrix downloaded from cyverse
 pan_coreID <- read.csv("/Users/x/Desktop/Data/pan_gene/pan_gene_matrix_v3_cyverse.csv") %>% 
   filter(class == "Core Gene") %>% select("Pan_gene_ID")
@@ -25,7 +27,7 @@ for (i in 1:26) {
 copy_matrix <- merge(pan_coreID,B73.copy,by="pan",all.x = T)
 for (i in 2:26) {
   copy_matrix <- merge(copy_matrix,
-                      get( paste0(NAM[i],".copy")),
+                       get( paste0(NAM[i],".copy")),
                        by = "pan",
                        all.x = T)
 }
@@ -57,10 +59,10 @@ for (i in 1:26) {
 ##
 CDS_matrix <- merge(pan_coreID,B73.CDS.agg,by="pan",all.x = T)
 for (i in 2:26) {
-CDS_matrix <- merge(CDS_matrix,
-                       get(paste0(NAM[i],".CDS.agg")),
-                       by = "pan",
-                       all.x = T)
+  CDS_matrix <- merge(CDS_matrix,
+                      get(paste0(NAM[i],".CDS.agg")),
+                      by = "pan",
+                      all.x = T)
 }
 names(CDS_matrix)  <- c("pan",NAM)
 ##Make the multicopy gene as NA
@@ -105,7 +107,7 @@ for (i in 1:26) {
 
 mCG_matrix <- merge(pan_coreID,B73.mCG,by="pan",all.x = T)
 for (i in 2:26) {
-mCG_matrix <- merge(mCG_matrix,
+  mCG_matrix <- merge(mCG_matrix,
                       get(paste0(NAM[i],".mCG")),
                       by = "pan",
                       all.x = T)
@@ -137,9 +139,9 @@ for (i in 1:26) {
 mCHG_matrix <- merge(pan_coreID,B73.mCHG,by="pan",all.x = T)
 for (i in 2:26) {
   mCHG_matrix <- merge(mCHG_matrix,
-                      get(paste0(NAM[i],".mCHG")),
-                      by = "pan",
-                      all.x = T)
+                       get(paste0(NAM[i],".mCHG")),
+                       by = "pan",
+                       all.x = T)
 }
 names(mCHG_matrix)  <- c("pan",NAM)
 ##Make the multicopy gene as NA
@@ -156,33 +158,33 @@ mCHG_pan <- data.frame(pan=mCHG_matrix_filter$pan)
 
 #Read in the expression data
 tpm_matrix <- function(tissue,panlist){
-for (i in 1:26) {
-  assign(
-    paste0(NAM[i],".", tissue),
-    get(gsub(".csv","",files[i])) %>% 
-      filter(cCG >=40 & cCHG >= 40 & mCHG <= 0.05 & copy == 1 ) %>% 
-      select(c("pan",tissue)) %>% unique()
-  )
-}
-
+  for (i in 1:26) {
+    assign(
+      paste0(NAM[i],".", tissue),
+      get(gsub(".csv","",files[i])) %>% 
+        filter(cCG >=40 & cCHG >= 40 & mCHG <= 0.05 & copy == 1 ) %>% 
+        select(c("pan",tissue)) %>% unique()
+    )
+  }
+  
   tissue_matrix <- merge(pan_coreID,
                          get(paste0(NAM[1],".", tissue)),
                          ,by="pan",all.x = T)
-for (i in 2:26) {
-  tissue_matrix <- merge(tissue_matrix,
-                      get(paste0(NAM[i],".", tissue)),
-                      by = "pan",
-                      all.x = T)
-}
-names(tissue_matrix)  <- c("pan",NAM)
-##Make the multicopy gene as NA
-sum(tissue_matrix$pan!=CDS_matrix$pan)
-sum(names(tissue_matrix)[1:27]!=names(mCHG_matrix)[1:27])
-#Remove the genes with big CDS difference in mCG matrix
-tissue_matrix[is.na(CDS_matrix_ij_num[,-28])] <- NA
-tissue_matrix_filter <- merge(panlist,tissue_matrix,
-                              by = "pan", all.x = T)
-return(tissue_matrix_filter[,-1])
+  for (i in 2:26) {
+    tissue_matrix <- merge(tissue_matrix,
+                           get(paste0(NAM[i],".", tissue)),
+                           by = "pan",
+                           all.x = T)
+  }
+  names(tissue_matrix)  <- c("pan",NAM)
+  ##Make the multicopy gene as NA
+  sum(tissue_matrix$pan!=CDS_matrix$pan)
+  sum(names(tissue_matrix)[1:27]!=names(mCHG_matrix)[1:27])
+  #Remove the genes with big CDS difference in mCG matrix
+  tissue_matrix[is.na(CDS_matrix_ij_num[,-28])] <- NA
+  tissue_matrix_filter <- merge(panlist,tissue_matrix,
+                                by = "pan", all.x = T)
+  return(tissue_matrix_filter[,-1])
 }
 
 mCHG_anther_matrix <- tpm_matrix("anther",mCHG_pan)
@@ -273,14 +275,14 @@ names(embryo_matrix)  <- c("pan",NAM[embryo_index])
 #Remove the genes with big CDS difference in mCG matrix
 embryo_matrix[is.na(CDS_matrix_ij_num[,names(embryo_matrix)])] <- NA
 mCHG_embryo_matrix_filter <- merge(mCHG_pan,embryo_matrix,
-                              by = "pan", all.x = T)
-mCHG_embryo <- stat_cal(embryo_matrix_filter[,-1],
-                   mCHG_matrix_filter[,names(embryo_matrix_filter[,-1])])
+                                   by = "pan", all.x = T)
+mCHG_embryo <- stat_cal(mCHG_embryo_matrix_filter[,-1],
+                        mCHG_matrix_filter[,names(mCHG_embryo_matrix_filter[,-1])])
 
 mCG_embryo_matrix_filter <- merge(mCG_pan,embryo_matrix,
-                                   by = "pan", all.x = T)
+                                  by = "pan", all.x = T)
 mCG_embryo <- stat_cal(mCG_embryo_matrix_filter[,-1],
-                        mCG_matrix_filter[,names(embryo_matrix_filter[,-1])])
+                       mCG_matrix_filter[,names(mCG_embryo_matrix_filter[,-1])])
 #Create endosperm matrix
 #CML52 CML228 CML277 does not have endosperm
 endosperm_index <- c(1:26)[-which(NAM %in% c("CML52","CML228","CML277"))]
@@ -295,46 +297,46 @@ for (i in endosperm_index) {
 }
 
 endosperm_matrix <- merge(pan_coreID,
-                       get(paste0(NAM[1],".", tissue)),
-                       by="pan",all.x = T)
+                          get(paste0(NAM[1],".", tissue)),
+                          by="pan",all.x = T)
 for (i in endosperm_index[-1]) {
   endosperm_matrix <- merge(endosperm_matrix,
-                         get(paste0(NAM[i],".", tissue)),
-                         by = "pan",
-                         all.x = T)
+                            get(paste0(NAM[i],".", tissue)),
+                            by = "pan",
+                            all.x = T)
 }
 names(endosperm_matrix)  <- c("pan",NAM[endosperm_index])
 #Remove the genes with big CDS difference in mCG matrix
 endosperm_matrix[is.na(CDS_matrix_ij_num[,names(endosperm_matrix)])] <- NA
 mCHG_endosperm_matrix_filter <- merge(mCHG_pan,endosperm_matrix,
-                              by = "pan", all.x = T)
-mCG_endosperm_matrix_filter <- merge(mCG_pan,endosperm_matrix,
                                       by = "pan", all.x = T)
+mCG_endosperm_matrix_filter <- merge(mCG_pan,endosperm_matrix,
+                                     by = "pan", all.x = T)
 mCHG_endosperm <- stat_cal(mCHG_endosperm_matrix_filter[,-1],
-                   mCHG_matrix_filter[,names(endosperm_matrix_filter[,-1])])
+                           mCHG_matrix_filter[,names(mCHG_endosperm_matrix_filter[,-1])])
 mCG_endosperm <- stat_cal(mCG_endosperm_matrix_filter[,-1],
-                           mCG_matrix_filter[,names(endosperm_matrix_filter[,-1])])
+                          mCG_matrix_filter[,names(mCG_endosperm_matrix_filter[,-1])])
 
 ######Plotting
 tissue <- c("anther","base","ear","middle","root","shoot","tassel","tip","endosperm","embryo")
 (stat_c_mCG <-  data.frame(value = rbind(summary(mCG_anther$cor),
-                                     summary(mCG_base$cor),
-                                     summary(mCG_ear$cor),
-                                     summary(mCG_middle$cor),
-                                     summary(mCG_root$cor),
-                                     summary(mCG_shoot$cor),
-                                     summary(mCG_tassel$cor),
-                                     summary(mCG_tip$cor),
-                                     summary(mCG_endosperm$cor),
-                                     summary(mCG_embryo$cor))[,3:4]  %>% as.list %>% unlist(use.names = F),
-                       tissue= rep(tissue,2),
-                       statistics = rep(c("Median","Mean"),each=10)))
+                                         summary(mCG_base$cor),
+                                         summary(mCG_ear$cor),
+                                         summary(mCG_middle$cor),
+                                         summary(mCG_root$cor),
+                                         summary(mCG_shoot$cor),
+                                         summary(mCG_tassel$cor),
+                                         summary(mCG_tip$cor),
+                                         summary(mCG_endosperm$cor),
+                                         summary(mCG_embryo$cor))[,3:4]  %>% as.list %>% unlist(use.names = F),
+                           tissue= rep(tissue,2),
+                           statistics = rep(c("Median","Mean"),each=10)))
 stat_c_mCG$tissue = factor(stat_c$tissue,
-                       levels =  c("tip","middle","base","root","shoot","ear","anther","tassel","endosperm","embryo") )
+                           levels =  c("tip","middle","base","root","shoot","ear","anther","tassel","endosperm","embryo") )
 stat_c_mCG$outlier <- "N"
 stat_c_mCG$outlier[stat_c$tissue=="endosperm"] <- "Y" 
 stat_c_mCG$outlier = factor(stat_c$outlier,
-                        levels = c("Y","N"))
+                            levels = c("Y","N"))
 
 
 (stat_c_mCHG <-  data.frame(value = rbind(summary(mCHG_anther$cor),
@@ -350,7 +352,7 @@ stat_c_mCG$outlier = factor(stat_c$outlier,
                             tissue= rep(tissue,2),
                             statistics = rep(c("Median","Mean"),each=10)))
 stat_c_mCHG$tissue = factor(stat_c$tissue,
-                       levels =  c("tip","middle","base","root","shoot","ear","anther","tassel","endosperm","embryo") )
+                            levels =  c("tip","middle","base","root","shoot","ear","anther","tassel","endosperm","embryo") )
 #######Supplemetal S4A
 ear_cor_list = mCG_ear$cor
 df_cor <- data.frame(cc=ear_cor_list)
@@ -368,15 +370,6 @@ ggplot(stat_c,aes(x=tissue,y=value,shape=statistics,col=outlier)) +
   xlab("") +
   ylab("")
 
-#Supplemetal S4C
-ear_cor_list2 = mCG_ear$cor[mCG_ear$p<0.05]
-df_cor <- data.frame(cc=ear_cor_list2)
-ggplot(df_cor,aes(x=cc)) +
-  geom_histogram(binwidth = 0.05,color="#88ada6") +
-  theme_classic() +
-  xlab("Correlation coefficient betweeen tpm & mCG") +
-  ylab("Count") +
-  ggtitle("                                      Ear")
 
 #######Supplemetal S4C
 ear_cor_list = mCHG_ear$cor
@@ -394,12 +387,3 @@ ggplot(stat_c_mCHG,aes(x=tissue,y=value,shape=statistics)) +
   theme_classic()  +
   xlab("") +
   ylab("")
-
-
-###write out two the expression matrice
-write.csv(endosperm_matrix, "/Users/x/Desktop/endosperm_matrix.csv",
-          row.names = F,
-          quote = F)
-write.csv(embryo_matrix, "/Users/x/Desktop/embryo_matrix.csv",
-          row.names = F,
-          quote = F)
