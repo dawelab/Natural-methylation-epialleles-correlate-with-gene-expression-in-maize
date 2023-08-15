@@ -84,6 +84,7 @@ for (i in endosperm_index[-1]) {
 names(endosperm_matrix)  <- c("pan",NAM[endosperm_index])
 
 #Read in the epiallele switch data
+express_path = "/Users/x/Desktop/"
 UM_gbM <-  read_rds(paste0(express_path,"epi_matrix_1_1_UM_gbM.rds"))
 UM_teM <- read_rds(paste0(express_path,"epi_matrix_1_1_UM_teM.rds"))
 gbM_teM <- read_rds(paste0(express_path,"epi_matrix_1_1_gbM_teM.rds"))
@@ -202,7 +203,7 @@ df_UM_gbM %>% ggplot(aes(x=tissue,y=diff)) +
   geom_violin() +
   geom_boxplot(width=0.1,outlier.size = 0.1) +
   coord_cartesian(ylim = c(-15,15)) +
-  theme_bw() + theme(text = element_blank())
+  theme_bw() 
 
 df_UM_gbM %>% group_by(tissue) %>% summarise(median(diff,na.rm = T)/mean(UM,na.rm = T))
 
@@ -226,7 +227,7 @@ df_UM_gbM %>% group_by(tissue) %>%  summarise(
   binom.test(sum(diff>0,na.rm = T),
              sum(diff>0, diff<0,na.rm = T),
              alternative = "two.sided"
-             )$p.value
+  )$p.value
 )
 df_UM_gbM %>% group_by(tissue) %>% summarise(wilcox.test(UM,gbM)$p.value)
 #######
@@ -259,7 +260,7 @@ df_UM_teM_proportion = data.frame(tissue,
                                   UM = (df_UM_teM %>% group_by(tissue) %>% summarise(sum(UM>teM, na.rm = T)))[,2],
                                   teM = (df_UM_teM %>% group_by(tissue) %>% summarise(sum(UM<teM, na.rm = T)))[,2],
                                   tie = (df_UM_teM %>% group_by(tissue) %>% summarise(sum(UM==teM, na.rm = T)))[,2]
-                                  )
+)
 names(df_UM_teM_proportion) = c("Tissue","UM","teM","tie")
 df_UM_teM_proportion$Total <- df_UM_teM_proportion$UM + df_UM_teM_proportion$teM + df_UM_teM_proportion$tie
 
@@ -298,30 +299,30 @@ embryo.gbM_teM <- mat_operation(gbM_teM_gbM[,which(names(gbM_teM) %in% names(emb
 
 endosperm.gbM_teM <- mat_operation(gbM_teM_gbM[,which(names(gbM_teM) %in% names(endosperm_matrix_gbM_teM))-1],
                                    gbM_teM_teM[,which(names(gbM_teM) %in% names(endosperm_matrix_gbM_teM))-1],
-                                  endosperm_matrix_gbM_teM)
+                                   endosperm_matrix_gbM_teM)
 
 df_gbM_teM <- data_frame(tissue=character(),
-                        diff = numeric())
+                         diff = numeric())
 for (i in 1:10) {
   df_gbM_teM <- rbind(df_gbM_teM,
-                     data.frame(tissue=tissue[i],
-                                diff = get(paste0(tissue[i],".gbM_teM"))))
+                      data.frame(tissue=tissue[i],
+                                 diff = get(paste0(tissue[i],".gbM_teM"))))
 }
 df_gbM_teM$tissue= factor(df_gbM_teM$tissue,levels = c("tip","middle","base","root","shoot","ear","anther","tassel","endosperm","embryo"))
 names(df_gbM_teM) <- c("tissue","gbM","teM")
 
 df_gbM_teM_proportion = data.frame(tissue,
-                                  gbM = (df_gbM_teM %>% group_by(tissue) %>% summarise(sum(gbM>teM, na.rm = T)))[,2],
-                                  teM = (df_gbM_teM %>% group_by(tissue) %>% summarise(sum(gbM<teM, na.rm = T)))[,2],
-                                  tie = (df_gbM_teM %>% group_by(tissue) %>% summarise(sum(gbM==teM, na.rm = T)))[,2]
+                                   gbM = (df_gbM_teM %>% group_by(tissue) %>% summarise(sum(gbM>teM, na.rm = T)))[,2],
+                                   teM = (df_gbM_teM %>% group_by(tissue) %>% summarise(sum(gbM<teM, na.rm = T)))[,2],
+                                   tie = (df_gbM_teM %>% group_by(tissue) %>% summarise(sum(gbM==teM, na.rm = T)))[,2]
 )
 names(df_gbM_teM_proportion) = c("Tissue","gbM","teM","tie")
 df_gbM_teM_proportion$Total <- df_gbM_teM_proportion$gbM + df_gbM_teM_proportion$teM + df_gbM_teM_proportion$tie
 
 df_gbM_teM_proportion = data.frame(Tissue=rep(df_gbM_teM_proportion$Tissue,2),
-                                  Proportion = c(df_gbM_teM_proportion$gbM/df_gbM_teM_proportion$Total,
-                                                 df_gbM_teM_proportion$teM/df_gbM_teM_proportion$Total),
-                                  Category = rep(c("gbM>teM","gbM<teM"),each=10))
+                                   Proportion = c(df_gbM_teM_proportion$gbM/df_gbM_teM_proportion$Total,
+                                                  df_gbM_teM_proportion$teM/df_gbM_teM_proportion$Total),
+                                   Category = rep(c("gbM>teM","gbM<teM"),each=10))
 
 df_gbM_teM_proportion$Tissue= factor(df_gbM_teM_proportion$Tissue,levels = c("tip","middle","base","root","shoot","ear","anther","tassel","endosperm","embryo"))
 
@@ -329,12 +330,3 @@ df_gbM_teM_proportion %>% ggplot(aes(x=Tissue,y=Proportion,fill=Category)) +
   geom_bar(stat = "identity",
            position = "dodge") + theme_bw()+
   theme(axis.text.x = element_text(angle = 90))
-
-
-df_UM_gbM %>% group_by(tissue) %>%  summarise(binom.test(sum(diff>0,na.rm = T),sum(diff>0, diff<0,na.rm = T), alternative = "two.sided")$p.value)
-df_UM_gbM %>% group_by(tissue) %>% summarise(wilcox.test(UM,gbM)$p.value)
-
-
-df_UM_teM %>% group_by(tissue) %>%  summarise(binom.test(sum(UM>teM,na.rm = T),sum(UM>teM, UM<teM,na.rm = T), alternative = "two.sided")$p.value)
-df_UM_teM %>% group_by(tissue) %>% summarise(wilcox.test(UM,teM)$p.value)
-
